@@ -1,2 +1,6 @@
-/Dataset
+/CelebA TFRec/list_attr_celeba.txt
+/CelebA TFRec/list_eval_partition.txt
+/CelebA TFRec/img_align_celeba.zip
+/CelebA TFRec/img_align_celeba
 .DS_Store
+/.idea
