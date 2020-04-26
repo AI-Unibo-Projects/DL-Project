@@ -60,8 +60,12 @@ def main():
 
         image_attributes = list(map(map_to_boolean, img_fn[1:]))
 
-        attributes = dict(zip([bytes(elem, 'utf-8') for elem in attributes_name],
-                              [bytes(elem, 'utf-8') for elem in image_attributes]))
+        attributes = []
+        for i in range(len(attributes_name)):
+            attributes.append(bytes(attributes_name[i], 'utf-8'))
+            attributes.append(bytes(image_attributes[i], 'utf-8'))
+
+        # attributes = [i for j in zip(attributes_name, image_attributes) for i in j]
 
         example = tf.train.Example(features=tf.train.Features(feature={
             'filename': tf.train.Feature(bytes_list=tf.train.BytesList(value=[filename.encode('utf-8')])),
