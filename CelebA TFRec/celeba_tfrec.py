@@ -12,13 +12,6 @@ tf.compat.v1.flags.DEFINE_string("number", "", "Number of files.")
 FLAGS = tf.compat.v1.flags.FLAGS
 
 
-def map_to_boolean(n):
-    if n == "1":
-        return "True"
-    else:
-        return "False"
-
-
 def main():
     """Main converter function."""
     if not os.path.exists('tfrecs'):
@@ -58,25 +51,37 @@ def main():
         with tf.io.gfile.GFile(img_path, 'rb') as fid:
             image_data = fid.read()
 
-        image_attributes = list(map(map_to_boolean, img_fn[1:]))
+        image_attributes = img_fn[1:]
 
-        attributes = []
-        for i in range(len(attributes_name)):
-            attributes.append(bytes(attributes_name[i], 'utf-8'))
-            attributes.append(bytes(image_attributes[i], 'utf-8'))
+        for j in range(0, len(image_attributes)):
+            image_attributes[j] = int(image_attributes[j])
 
-        # attributes = [i for j in zip(attributes_name, image_attributes) for i in j]
-
-        example = tf.train.Example(features=tf.train.Features(feature={
+        feature_dict = {
             'filename': tf.train.Feature(bytes_list=tf.train.BytesList(value=[filename.encode('utf-8')])),
             'height': tf.train.Feature(int64_list=tf.train.Int64List(value=[img_shape[0]])),
             'width': tf.train.Feature(int64_list=tf.train.Int64List(value=[img_shape[1]])),
             'depth': tf.train.Feature(int64_list=tf.train.Int64List(value=[img_shape[2]])),
             'image': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_data])),
-            'attributes': tf.train.Feature(bytes_list=tf.train.BytesList(value=attributes))
-        }))
+        }
+
+        attributes_dict = dict(zip(attributes_name,
+                                   [tf.train.Feature(int64_list=tf.train.Int64List(value=[elem])) for elem in
+                                    image_attributes]))
+
+        feature_dict.update(attributes_dict)
+
+        example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
 
         writer.write(example.SerializeToString())
+
+    names = str(attributes_name).strip('[]')
+
+    writer = tf.io.TFRecordWriter("tfrecs/" + "attribute_list.tfrec")
+    example = tf.train.Example(features=tf.train.Features(feature={
+        'names': tf.train.Feature(bytes_list=tf.train.BytesList(value=[names.encode('utf-8')])),
+    }))
+
+    writer.write(example.SerializeToString())
     writer.close()
 
 
