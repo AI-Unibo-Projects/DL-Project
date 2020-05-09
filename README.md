@@ -1,2 +1,2 @@
 # Deep-Learning-Project
-GAN based face generator
+Face generator
