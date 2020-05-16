@@ -55,21 +55,13 @@ def main():
 
         for j in range(0, len(image_attributes)):
             image_attributes[j] = int(image_attributes[j])
+            if image_attributes[j] < 1:
+                image_attributes[j] = 0
 
         feature_dict = {
-            'filename': tf.train.Feature(bytes_list=tf.train.BytesList(value=[filename.encode('utf-8')])),
-            'height': tf.train.Feature(int64_list=tf.train.Int64List(value=[img_shape[0]])),
-            'width': tf.train.Feature(int64_list=tf.train.Int64List(value=[img_shape[1]])),
-            'depth': tf.train.Feature(int64_list=tf.train.Int64List(value=[img_shape[2]])),
             'image': tf.train.Feature(bytes_list=tf.train.BytesList(value=[image_data])),
+            'labels': tf.train.Feature(int64_list=tf.train.Int64List(value=image_attributes))
         }
-
-        attributes_dict = dict(zip(attributes_name,
-                                   [tf.train.Feature(int64_list=tf.train.Int64List(value=[elem])) for elem in
-                                    image_attributes]))
-
-        feature_dict.update(attributes_dict)
-
         example = tf.train.Example(features=tf.train.Features(feature=feature_dict))
 
         writer.write(example.SerializeToString())
